@@ -1,5 +1,5 @@
 import {Text, View, Image, TouchableOpacity, FlatList, Button} from "react-native";
-import {Link} from "expo-router";
+import {Link, router, useLocalSearchParams} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import images from "@/constants/images";
 import Search from "@/components/Search";
@@ -8,6 +8,9 @@ import Filters from "@/components/Filters";
 import icons from "@/constants/icons";
 import {useGlobalContext} from "@/lib/global-provider";
 import seed from "@/lib/seed";
+import {useAppwrite} from "@/lib/useAppwrite";
+import {getLatestProperties, getProperties} from "@/lib/appwrite";
+import {useEffect} from "react";
 
 //ScrollView
 //FlatList dynamic data, list of items. Can't have flat list in different directions
@@ -15,13 +18,35 @@ import seed from "@/lib/seed";
 export default function Index() {
 
     const {user} = useGlobalContext();
+    const params = useLocalSearchParams<{ query?: string; filter?: string }>()
+    const {data: latestProperties, loading: latestPropertiesLoading} = useAppwrite({fn: getLatestProperties})
+    const {data: properties, loading, refetch} = useAppwrite({
+        fn: getProperties,
+        params: {
+            filter: params.filter!,
+            query: params.query!,
+            limit: 6,
+        },
+        skip: true
+    })
+
+    useEffect(() => {
+        refetch({
+            filter: params.filter!,
+            query: params.query!,
+            limit: 6
+        })
+    }, [params.query, params.filter])
+
+    const handleCardPress = (id: string) => {
+        router.push(`/properties/${id}`)
+    }
 
     return (
         <SafeAreaView className='bg-white h-full'>
-            <Button title='seed' onPress={seed}/>
             <FlatList
-                data={[1, 2]}
-                renderItem={({item}) => <Card/>}
+                data={properties}
+                renderItem={({item}) => <Card item={item} onPress={() => handleCardPress(item.$id)}/>}
                 keyExtractor={(item) => item.toString()}
                 numColumns={2}
                 contentContainerClassName='pb-32'
@@ -50,8 +75,8 @@ export default function Index() {
                                 </TouchableOpacity>
                             </View>
                             <FlatList
-                                data={[1, 2, 3]}
-                                renderItem={({item}) => <FeaturedCard/>}
+                                data={latestProperties}
+                                renderItem={({item}) => <FeaturedCard item={item} onPress={()=> handleCardPress(item.$id)}/>}
                                 keyExtractor={(item) => item.toString()}
                                 horizontal
                                 bounces={false}

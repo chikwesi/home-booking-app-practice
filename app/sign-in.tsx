@@ -1,10 +1,11 @@
 import icons from "@/constants/icons";
 import images from "@/constants/images";
 import React from 'react';
-import {Alert, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {login} from "@/lib/appwrite";
 import {useGlobalContext} from "@/lib/global-provider";
 import {Redirect} from "expo-router";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 const SignIn = () => {
 
@@ -26,7 +27,7 @@ const SignIn = () => {
 
     return (
         <SafeAreaView className="bg-white h-full">
-            <ScrollView contentContainerClassName="min-h-full">
+            <ScrollView contentContainerClassName="h-full">
                 <Image source={images.onboarding} className="w-full h-4/6" resizeMode='contain'/>
                 <View className='px-10 flex flex-col'>
                     <Text className="text-base text-center uppercase font-rubik text-black-200">Welcome to
